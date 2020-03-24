@@ -1,0 +1,46 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "${self:service}-${self:provider.stage}-users"
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  MessagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "${self:service}-${self:provider.stage}-messages"
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: sourceId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: N
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      GlobalSecondaryIndexes:
+        - IndexName: sourceId-timestamp-index
+          KeySchema:
+            - AttributeName: sourceId
+              KeyType: HASH
+            - AttributeName: timestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5

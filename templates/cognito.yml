@@ -1,0 +1,110 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+ 
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: "${self:service}-${self:provider.stage}-user-pool"
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+      LambdaConfig:
+        PostConfirmation: !GetAtt [ PostConfirmationLambdaFunction, Arn ]
+  ApiGatewayAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: "${self:service}-${self:provider.stage}-authorizer"
+      RestApiId:
+        Ref: ApiGatewayRestApi
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+        - !GetAtt [ UserPool, Arn ]
+      IdentitySource: method.request.header.Authorization
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: "${self:service}-${self:provider.stage}-user-pool-client"
+      GenerateSecret: true
+      ExplicitAuthFlows:
+        - ADMIN_NO_SRP_AUTH
+      RefreshTokenValidity: 30
+      UserPoolId: !Ref UserPool
+      ReadAttributes:
+        - "name"
+        - "email"
+        - "profile"
+        - "preferred_username"
+      WriteAttributes:
+        - "name"
+        - "email"
+        - "profile"
+        - "preferred_username"
+      SupportedIdentityProviders:
+        - "LINE"
+      CallbackURLs: 
+        - "http://localhost:3000/callback"
+        - !Join [ "", [ "https://", !GetAtt [ ContentsCloudFrontDistribution, DomainName ], "/callback" ] ]
+      LogoutURLs:
+        - "http://localhost:3000/signout"
+        - !Join [ "", [ "https://", !GetAtt [ ContentsCloudFrontDistribution, DomainName ], "/signout" ] ]
+      AllowedOAuthFlows:
+        - implicit
+      AllowedOAuthScopes: 
+        - email
+        - openid
+        - aws.cognito.signin.user.admin
+        - profile
+      AllowedOAuthFlowsUserPoolClient: true
+  UserPoolIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties: 
+      AttributeMapping:
+        email: email
+        username: sub
+        name: name
+        picture: picture
+      ProviderDetails:
+        client_id: ${self:custom.environment.${self:provider.stage}.LineChannelId}
+        client_secret: ${self:custom.environment.${self:provider.stage}.LineChannelSecret}
+        attributes_request_method: GET
+        oidc_issuer: "https://access.line.me"
+        authorize_scopes: "profile email openid"
+        authorize_url: "https://access.line.me/oauth2/v2.1/authorize"
+        token_url: "https://api.line.me/oauth2/v2.1/token"
+        attributes_url: "https://api.line.me/v2/profile"
+        jwks_uri: "https://api.line.me/oauth2/v2.1/verify"
+      ProviderName: "LINE"
+      ProviderType: OIDC
+      UserPoolId: !Ref UserPool
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      UserPoolId: !Ref UserPool
+      Domain: "${self:service}-${self:provider.stage}"
+  PostConfirmationLambdaInvocationPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt [ PostConfirmationLambdaFunction, Arn ]
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt [ UserPool, Arn ]
+  UserPoolGroupAdmin:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: Admin
+      Precedence: 1
+      UserPoolId: !Ref UserPool
+Outputs:
+  UserPoolArn:
+    Value: !GetAtt UserPool.Arn
+    Export:
+      Name: "${self:service}-${self:provider.stage}-user-pool-arn"
+  UserPoolClient:
+    Value: !Ref UserPoolClient
+    Export:
+      Name: "${self:service}-${self:provider.stage}-user-pool-client-id"

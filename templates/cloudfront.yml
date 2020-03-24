@@ -1,0 +1,90 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref AWS::StackName
+  ContentsS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ContentsS3Bucket
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Join [ "", [ "arn:aws:s3:::", !Ref "ContentsS3Bucket", "/*" ] ]
+            Principal:
+              AWS: !Join [ "", [ "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ", !Ref "CloudFrontOriginAccessIdentity" ] ]
+  ContentsCloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        # Aliases: [ "${self:custom.environment.${self:provider.stage}.Domain}" ]
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+          # AcmCertificateArn: "${self:custom.environment.${self:provider.stage}.AcmCertificateArn}"
+          # SslSupportMethod: sni-only
+          # MinimumProtocolVersion: TLSv1
+        # WebACLId: !Ref ContentsCloudFrontWebACL
+        Origins:
+        - Id: S3Origin
+          DomainName: !GetAtt ContentsS3Bucket.DomainName
+          S3OriginConfig:
+            OriginAccessIdentity: !Join [ "", [ "origin-access-identity/cloudfront/", !Ref "CloudFrontOriginAccessIdentity" ] ]
+        - Id: APIOrigin
+          DomainName: !Join [ "", [ !Ref ApiGatewayRestApi, ".execute-api.", !Ref AWS::Region, ".amazonaws.com" ] ]
+          CustomOriginConfig:
+            HTTPPort: 80
+            HTTPSPort: 443
+            OriginKeepaliveTimeout: 60
+            OriginProtocolPolicy: "https-only"
+            OriginReadTimeout: 60
+            OriginSSLProtocols:
+              - 'TLSv1.2'
+          OriginPath: "/${self:provider.stage}"
+        Enabled: true
+        DefaultRootObject: index.html
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ForwardedValues:
+            QueryString: false
+          ViewerProtocolPolicy: redirect-to-https
+        CacheBehaviors:
+        - TargetOriginId: APIOrigin
+          PathPattern: "api/*"
+          AllowedMethods:
+            - DELETE
+            - GET
+            - HEAD
+            - OPTIONS
+            - PATCH
+            - POST
+            - PUT
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          ForwardedValues:
+            QueryString: true
+            Headers:
+              - "Authorization"
+            Cookies:
+              Forward: all
+          ViewerProtocolPolicy: redirect-to-https
+          DefaultTTL: 0
+          MaxTTL: 0
+          MinTTL: 0
+        CustomErrorResponses:
+        - ErrorCode: '404'
+          ResponsePagePath: "/index.html"
+          ResponseCode: '200'
+        - ErrorCode: '403'
+          ResponsePagePath: "/index.html"
+          ResponseCode: '200'
+
+Outputs:
+  ContentsCloudFrontDistributionId:
+    Value: !Ref ContentsCloudFrontDistribution

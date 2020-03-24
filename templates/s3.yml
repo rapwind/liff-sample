@@ -1,0 +1,11 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Resources:
+  ContentsS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      AccessControl: Private
+      BucketName: "${self:service}-${self:provider.stage}-contents-bucket"
+      # BucketName: "${self:custom.environment.${self:provider.stage}.Domain}-contents-bucket"

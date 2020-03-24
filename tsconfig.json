@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": [
+      "esnext",
+      "esnext.asynciterable",
+      "dom"
+    ],
+    "experimentalDecorators": true,
+    "removeComments": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": [
+        "./src/frontend/*",
+        "./src/backend/*"
+      ]
+    },
+    "types": [
+      "@types/node",
+      "@nuxt/types",
+      "@nuxtjs/axios"
+    ]
+  }
+}

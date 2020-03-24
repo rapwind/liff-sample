@@ -1,0 +1,15 @@
+.aws/credentials
+.nuxt/
+.serverless/
+.webpack/
+coverage/
+dist/
+env/
+node_modules/
+*.log
+*.tgz
+.env
+
+# OS X files
+.DS_Store
+Thumbs.db
