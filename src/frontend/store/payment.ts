@@ -7,6 +7,8 @@ interface State {
   card: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
+// TODO: gettersちゃんとつくる
+
 export const state = (): State => ({
   loadingFetchCard: false,
   loadingUpdateCard: false,

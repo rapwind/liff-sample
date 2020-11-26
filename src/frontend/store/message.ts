@@ -24,6 +24,8 @@ export const mutations: MutationTree<State> = {
   }
 };
 
+// TODO: gettersちゃんとつくる
+
 export const actions: ActionTree<State, State> = {
   async list({ commit }, { userId }: { userId: string }): Promise<void> {
     commit("setMessages", []);

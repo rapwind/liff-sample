@@ -50,8 +50,8 @@ Resources:
         - "http://localhost:3000/callback"
         - !Join [ "", [ "https://", !GetAtt [ ContentsCloudFrontDistribution, DomainName ], "/callback" ] ]
       LogoutURLs:
-        - "http://localhost:3000/signout"
-        - !Join [ "", [ "https://", !GetAtt [ ContentsCloudFrontDistribution, DomainName ], "/signout" ] ]
+        - "http://localhost:3000/"
+        - !Join [ "", [ "https://", !GetAtt [ ContentsCloudFrontDistribution, DomainName ], "/" ] ]
       AllowedOAuthFlows:
         - implicit
       AllowedOAuthScopes: 
@@ -79,6 +79,27 @@ Resources:
         attributes_url: "https://api.line.me/v2/profile"
         jwks_uri: "https://api.line.me/oauth2/v2.1/verify"
       ProviderName: "LINE"
+      ProviderType: OIDC
+      UserPoolId: !Ref UserPool
+  UserPoolIdentityProvider2:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties: 
+      AttributeMapping:
+        email: email
+        username: sub
+        name: name
+        picture: picture
+      ProviderDetails:
+        client_id: 1654033113
+        client_secret: 765511321e4b228671d21cbaccd3951b
+        attributes_request_method: GET
+        oidc_issuer: "https://access.line.me"
+        authorize_scopes: "profile email openid"
+        authorize_url: "https://access.line.me/oauth2/v2.1/authorize"
+        token_url: "https://api.line.me/oauth2/v2.1/token"
+        attributes_url: "https://api.line.me/v2/profile"
+        jwks_uri: "https://api.line.me/oauth2/v2.1/verify"
+      ProviderName: "LINE2"
       ProviderType: OIDC
       UserPoolId: !Ref UserPool
   UserPoolDomain:

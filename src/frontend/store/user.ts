@@ -10,6 +10,8 @@ interface State {
   users: User[];
 }
 
+// TODO: gettersちゃんとつくる
+
 export const state = (): State => ({
   loadingList: false,
   loadingFetch: false,

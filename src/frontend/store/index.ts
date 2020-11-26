@@ -10,6 +10,8 @@ interface State {
 
 export const state = (): State => ({});
 
+// TODO: gettersちゃんとつくる
+
 export const mutations: MutationTree<State> = {
   setAuthorizationToken(state, accessToken): void {
     state.token = accessToken;

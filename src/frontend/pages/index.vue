@@ -1,12 +1,10 @@
 <template>
   <v-container>
-    <v-card v-if="isMounted" :loading="loadingFetch">
-      <v-card-actions>
-        <v-btn to="/user/update">プロフィールの変更</v-btn>
-        <v-btn to="/payment">決済</v-btn>
-        <v-btn to="/signout">ログアウト</v-btn>
-      </v-card-actions>
-    </v-card>
+    <div v-if="isMounted" :loading="loadingFetch">
+      <v-btn to="/user/update">プロフィールの変更</v-btn>
+      <v-btn to="/payment">決済</v-btn>
+      <v-btn to="/signout">ログアウト</v-btn>
+    </div>
     <v-card v-if="isAdmin()" class="mt-4">
       <v-card-subtitle>管理ツール</v-card-subtitle>
       <v-card-actions>
@@ -30,10 +28,6 @@ import { mapState } from "vuex";
   }
 })
 export default class extends Vue {
-  private signoutUrl = `https://${process.env.CognitoDomain}/logout?client_id=${
-    process.env.CognitoClientId
-  }&logout_uri=${encodeURIComponent(`${process.env.FrontUrl}/signout`)}`;
-
   private isMounted = false;
 
   private isAdmin = (): boolean =>

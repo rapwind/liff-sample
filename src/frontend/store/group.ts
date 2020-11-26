@@ -19,6 +19,8 @@ export const state = (): State => ({
   users: []
 });
 
+// TODO: gettersちゃんとつくる
+
 export const mutations: MutationTree<State> = {
   setLoadingList(state, isLoading): void {
     state.loadingList = isLoading;

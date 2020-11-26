@@ -22,6 +22,12 @@ export default class Cognito {
     this.userPoolId = params.userPoolId;
   }
 
+  getCognitoFed() {
+    return this.provider.listIdentityProviders({
+      UserPoolId: this.userPoolId
+    }).promise();
+  }
+
   private async getUserWithoutGroup(
     userId: string
   ): Promise<CognitoIdentityServiceProvider.UserType> {
@@ -53,9 +59,9 @@ export default class Cognito {
     );
     return {
       id: userId,
-      email: user.Attributes.find(v => v.Name === "email").Value,
-      lineName: user.Attributes.find(v => v.Name === "name").Value,
-      profilePictureUrl: user.Attributes.find(v => v.Name === "picture").Value,
+      email: user.Attributes.find(v => v.Name === "email").Value, // TODO: Fix optional
+      lineName: user.Attributes.find(v => v.Name === "name").Value, // TODO: Fix optional
+      profilePictureUrl: user.Attributes.find(v => v.Name === "picture").Value, // TODO: Fix optional
       identities: JSON.parse(
         user.Attributes.find(e => e.Name === "identities").Value
       ),
@@ -72,9 +78,9 @@ export default class Cognito {
       .promise();
     return Users.map(user => ({
       id: user.Attributes.find(v => v.Name === "sub").Value,
-      email: user.Attributes.find(v => v.Name === "email").Value,
-      lineName: user.Attributes.find(v => v.Name === "name").Value,
-      profilePictureUrl: user.Attributes.find(v => v.Name === "picture").Value,
+      email: user.Attributes.find(v => v.Name === "email").Value, // TODO: Fix optional
+      lineName: user.Attributes.find(v => v.Name === "name").Value, // TODO: Fix optional
+      profilePictureUrl: user.Attributes.find(v => v.Name === "picture").Value, // TODO: Fix optional
       identities: JSON.parse(
         user.Attributes.find(e => e.Name === "identities").Value
       )

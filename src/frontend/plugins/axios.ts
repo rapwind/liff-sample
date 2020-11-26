@@ -15,7 +15,7 @@ export default ({ $axios, store, redirect }): void => {
     console.error(error); // eslint-disable-line no-console
     const code = parseInt(error.response && error.response.status, 10);
     if (code === 401) {
-      redirect("/signout");
+      redirect("/signin");
     }
   });
 };

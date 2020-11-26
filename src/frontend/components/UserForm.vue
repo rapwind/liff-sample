@@ -24,7 +24,6 @@
     </v-card-title>
     <v-divider></v-divider>
     <v-form v-model="isValid">
-      <v-card-text>氏名</v-card-text>
       <v-row class="px-4">
         <v-col>
           <v-text-field
